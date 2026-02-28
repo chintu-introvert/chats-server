@@ -1,10 +1,10 @@
 import express from 'express';
 import userController from './user.controller.js';
+import { authHandler } from '../../middlewares/authHandler.js';
 
 const router = express.Router();
 
-router.post('/', userController.createUser);
-router.get('/', userController.listUsers);
-router.get('/:id', userController.getUser);
+router.get('/', authHandler, userController.getUsers);
+router.get('/:id', authHandler, userController.getUser);
 
 export default router;

@@ -1,15 +1,13 @@
 import masterKnex from '../../config/knex.js';
 import slaveKnex from '../../config/read_knex.js';
 import { Message } from '../../domain/entities/Message.js';
-import { v4 as uuidv4 } from 'uuid';
 
 class MessageRepository {
     async createMessage({ roomId, senderId, content }) {
-        const id = uuidv4();
         await masterKnex('messages')
-            .insert({ id, room_id: roomId, sender_id: senderId, content });
+            .insert({ room_id: roomId, sender_id: senderId, content });
 
-        const message = await masterKnex('messages').where({ id }).first();
+        const message = await slaveKnex('messages').where({ room_id: roomId }).first();
         return new Message(message);
     }
 

@@ -1,12 +1,9 @@
 import masterKnex from '../../config/knex.js';
 import slaveKnex from '../../config/read_knex.js';
-import { v4 as uuidv4 } from 'uuid';
 
 class RoomRepository {
     async createAsync({ name, type = 'group' }) {
-        const id = uuidv4();
-        await masterKnex('rooms').insert({ id, name, type });
-        return masterKnex('rooms').where({ id }).first();
+        await masterKnex('rooms').insert({ name, type });
     }
 
     async findById(id) {
