@@ -1,28 +1,24 @@
 import userRepository from './user.repository.js';
+import bcrypt from 'bcrypt';
 
 class UserService {
     async createUser(payload) {
-        // In production, you would hash the password here (e.g. bcrypt)
-        const passwordHash = `hashed_${payload.password}`;
-
-        // The service relies on the repository, completely detached from DB scaling logic
-        const user = await userRepository.create({ ...payload, passwordHash });
-
-        const { password_hash, ...safeUser } = user;
+        const hashedPassword = await bcrypt.hash(payload.password, 10);
+        const user = await userRepository.create({ ...payload, passwordHash: hashedPassword });
+        const { password, ...safeUser } = user;
         return safeUser;
+    }
+
+    async getUsers(page = 1, limit = 10) {
+        const offset = (page - 1) * limit;
+        return userRepository.findAll(limit, offset);
     }
 
     async getUser(id) {
         const user = await userRepository.findById(id);
         if (!user) throw new Error('User not found');
-
-        const { password_hash, ...safeUser } = user;
+        const { password, ...safeUser } = user;
         return safeUser;
-    }
-
-    async listUsers(page = 1, limit = 10) {
-        const offset = (page - 1) * limit;
-        return userRepository.findAll(limit, offset);
     }
 }
 
