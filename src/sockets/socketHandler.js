@@ -1,5 +1,3 @@
-import { createAdapter } from '@socket.io/redis-adapter';
-import { createClient } from 'redis';
 import { socketAuth } from './middlewares/socketAuth.js';
 import chatService from '../modules/message/message.service.js';
 import userRepository from '../modules/user/user.repository.js';
@@ -8,17 +6,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const setupSockets = async (io) => {
-    try {
-        const pubClient = createClient({ url: process.env.REDIS_URL || 'redis://127.0.0.1:6379' });
-        const subClient = pubClient.duplicate();
-
-        await Promise.all([pubClient.connect(), subClient.connect()]);
-        io.adapter(createAdapter(pubClient, subClient));
-        logger.info('Connected to Redis and established Socket.IO adapter');
-    } catch (error) {
-        logger.error('Failed connecting to Redis Adapter', { error });
-    }
-
     io.use(socketAuth);
 
     io.on('connection', async (socket) => {

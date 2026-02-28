@@ -6,10 +6,10 @@ import { v4 as uuidv4 } from 'uuid';
 class MessageRepository {
     async createMessage({ roomId, senderId, content }) {
         const id = uuidv4();
-        await db('messages')
+        await masterKnex('messages')
             .insert({ id, room_id: roomId, sender_id: senderId, content });
 
-        const message = await db('messages').where({ id }).first();
+        const message = await masterKnex('messages').where({ id }).first();
         return new Message(message);
     }
 

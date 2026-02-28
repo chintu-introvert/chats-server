@@ -16,17 +16,15 @@ app.use(express.json());
 // Load UI/Module Routes
 app.use('/api/users', userRoutes);
 
-// Health Check Endpoint verifying Master and Slave validity
-app.get('/health', async (req, res) => {
-    try {
-        await masterKnex.raw('SELECT 1 as result');
-        await slaveKnex.raw('SELECT 1 as result');
-        res.status(200).json({ status: 'ok', databases: { master: 'connected', slave: 'connected' } });
-    } catch (error) {
-        logger.error('Health check failed', { error });
-        res.status(503).json({ status: 'unavailable' });
-    }
+// Simple Health API
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'Server is running successfully' });
 });
+
+app.get('/', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'Chat API is up and running' });
+});
+
 
 app.use(errorHandler);
 

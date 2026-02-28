@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import config from '../../../config/config.js';
+
 
 export const socketAuth = (socket, next) => {
     const token = socket.handshake.auth.token || socket.handshake.headers['authorization'];

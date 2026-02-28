@@ -2,12 +2,23 @@ import app from './app.js';
 import logger from './utils/logger.js';
 import masterKnex from './config/knex.js';
 import slaveKnex from './config/read_knex.js';
+import { Server } from 'socket.io';
+import { setupSockets } from './sockets/socketHandler.js';
 
 const PORT = process.env.PORT || 3000;
 
 const server = app.listen(PORT, () => {
     logger.info(`Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
+
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+
+setupSockets(io);
 
 // Implement Graceful Shutdown
 const gracefulShutdown = async (signal) => {
@@ -50,6 +61,10 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Catch Unhandled exceptions to prevent zombie processes
+process.on('exit', (code) => {
+    logger.info(`Process is exiting with code: ${code}`);
+});
+
 process.on('uncaughtException', (err) => {
     logger.error('Uncaught Exception thrown', err);
     gracefulShutdown('uncaughtException');
