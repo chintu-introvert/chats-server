@@ -10,7 +10,7 @@ class AuthService {
         const existingUser = await userRepository.findByEmail(email);
 
         if (existingUser) {
-            throw new ValidationError('Email already in use');
+            throw new Error('Email already in use');
         }
 
         const passwordHash = await hashPassword(password);
@@ -22,17 +22,17 @@ class AuthService {
     async login({ email, password }) {
         const user = await userRepository.findByEmail(email);
         if (!user) {
-            throw new UnauthorizedError('Invalid credentials');
+            throw new Error('Invalid credentials');
         }
 
         const isPasswordValid = await comparePassword(password, user.password);
         if (!isPasswordValid) {
-            throw new UnauthorizedError('Invalid credentials');
+            throw new Error('Invalid credentials');
         }
 
         const token = jwt.sign(
             { id: user.id, name: user.name },
-            process.env.JWT_SECRET || 'your_super_secret_jwt_key',
+            process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 

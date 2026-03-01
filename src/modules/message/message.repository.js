@@ -3,18 +3,22 @@ import slaveKnex from '../../config/read_knex.js';
 import { Message } from '../../domain/entities/Message.js';
 
 class MessageRepository {
-    async createMessage({ roomId, senderId, content }) {
-        await masterKnex('messages')
-            .insert({ room_id: roomId, sender_id: senderId, content });
+    async createMessage({ roomId, senderId, content }, trx = masterKnex) {
+        await trx('messages')
+            .insert({ roomid: roomId, userid: senderId, content });
 
-        const message = await slaveKnex('messages').where({ room_id: roomId }).first();
+        const message = await trx('messages')
+            .where({ roomid: roomId })
+            .orderBy('id', 'desc')
+            .first();
+
         return new Message(message);
     }
 
     async getMessagesByRoom(roomId, limit = 50, offset = 0) {
         const records = await slaveKnex('messages')
-            .where({ room_id: roomId })
-            .orderBy('created_at', 'desc')
+            .where({ roomid: roomId })
+            .orderBy('id', 'desc')
             .limit(limit)
             .offset(offset);
 

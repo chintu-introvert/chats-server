@@ -20,6 +20,9 @@ const io = new Server(server, {
 
 setupSockets(io);
 
+// Hack to keep the process alive in case the event loop empties
+setInterval(() => { }, 1000 * 60 * 60);
+
 // Implement Graceful Shutdown
 const gracefulShutdown = async (signal) => {
     logger.info(`Received ${signal}. Starting graceful shutdown...`);
@@ -70,6 +73,7 @@ process.on('uncaughtException', (err) => {
     gracefulShutdown('uncaughtException');
 });
 process.on('unhandledRejection', (reason, promise) => {
-    logger.error('Unhandled Rejection at Promise', { reason, promise });
+    console.error('Unhandled Rejection at Promise', reason);
+    logger.error('Unhandled Rejection at Promise', { reason: reason ? reason.message : 'Unknown' });
     gracefulShutdown('unhandledRejection');
 });

@@ -3,9 +3,9 @@ import userService from './user.service.js';
 class UserController {
     async getUsers(req, res, next) {
         try {
-            const page = parseInt(req.query.page, 10) || 1;
-            const limit = parseInt(req.query.limit, 10) || 10;
-            const users = await userService.getUsers(page, limit);
+            // const page = parseInt(req.query.page, 10) || 1;
+            // const limit = parseInt(req.query.limit, 10) || 10;
+            const users = await userService.getUsers();
             res.status(200).json({ success: true, data: users });
         } catch (error) {
             next(error);

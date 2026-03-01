@@ -8,7 +8,10 @@ export const authHandler = (req, res, next) => {
       .json({ success: false, error: "Token missing" });
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = jwt.verify(
+    token.startsWith("Bearer ") ? token.split(" ")[1] : token,
+    process.env.JWT_SECRET
+  );
   if (!decoded) {
     return res.status(403).json({ success: false, error: "Invalid token" });
   }

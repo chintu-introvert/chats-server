@@ -4,7 +4,7 @@ import { authHandler } from '../../middlewares/authHandler.js';
 
 const router = express.Router();
 
-router.get('/', authHandler, userController.getUsers);
+router.get('/get-all-users', authHandler, userController.getUsers);
 router.get('/:id', authHandler, userController.getUser);
 
 export default router;

@@ -20,12 +20,12 @@ class UserRepository {
         return slaveKnex('users').where({ id }).first();
     }
 
+
     // Additional Read query hitting the slave
-    async findAll(limit = 10, offset = 0) {
+    async findAll() {
         return slaveKnex('users')
-            .select('id', 'name', 'email')
-            .limit(limit)
-            .offset(offset);
+            .select('id', 'name', 'email');
+
     }
 
     async findByEmail(email) {

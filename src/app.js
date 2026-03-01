@@ -1,10 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import masterKnex from './config/knex.js';
-import slaveKnex from './config/read_knex.js';
-import logger from './utils/logger.js';
-import { authHandler } from './middlewares/authHandler.js';
+
 import { errorHandler } from './middlewares/errorHandler.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import userRoutes from './modules/user/user.routes.js';

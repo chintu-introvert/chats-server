@@ -9,9 +9,9 @@ class UserService {
         return safeUser;
     }
 
-    async getUsers(page = 1, limit = 10) {
-        const offset = (page - 1) * limit;
-        return userRepository.findAll(limit, offset);
+    async getUsers() {
+        // const offset = (page - 1) * limit;
+        return userRepository.findAll();
     }
 
     async getUser(id) {
