@@ -27,7 +27,7 @@ class UserRepository {
             .select('id', 'name', 'email');
 
     }
-
+    // check if user is already exists
     async findByEmail(email) {
         return slaveKnex('users').where({ email }).first();
     }

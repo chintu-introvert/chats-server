@@ -16,25 +16,23 @@ class RoomRepository {
 
     async findPrivateRoom(user1Id, user2Id) {
         const result = await slaveKnex('user_rooms as ur1')
-            .join('user_rooms as ur2', 'ur1.roomid', 'ur2.roomid')
-            .join('rooms', 'rooms.id', 'ur1.roomid')
+            .select('ur1.roomid')
             .where('ur1.userid', user1Id)
-            .where('ur2.userid', user2Id)
-            .where('rooms.type', 'private')
-            .select('rooms.id')
+            .where('ur1.receiverid', user2Id)
             .first();
         return result;
     }
 
+    // create a private room and insert the user id and receiver id into the user_rooms table
     async createPrivateRoom(user1Id, user2Id, trx = masterKnex) {
         const [roomId] = await trx('rooms').insert({
-            name: `private_${user1Id}_${user2Id}`,
-            type: 'private'
+            id: null,
+            type: 'direct'
         });
 
         await trx('user_rooms').insert([
-            { userid: user1Id, roomid: roomId },
-            { userid: user2Id, roomid: roomId }
+            { userid: user1Id, roomid: roomId, receiverid: user2Id },
+            { userid: user2Id, roomid: roomId, receiverid: user1Id }
         ]);
 
         return roomId;

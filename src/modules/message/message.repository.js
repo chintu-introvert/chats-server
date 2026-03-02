@@ -5,7 +5,7 @@ import { Message } from '../../domain/entities/Message.js';
 class MessageRepository {
     async createMessage({ roomId, senderId, content }, trx = masterKnex) {
         await trx('messages')
-            .insert({ roomid: roomId, userid: senderId, content });
+            .insert({ id: null, roomid: roomId, userid: senderId, content });
 
         const message = await trx('messages')
             .where({ roomid: roomId })

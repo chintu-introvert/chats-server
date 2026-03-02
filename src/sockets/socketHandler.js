@@ -48,13 +48,15 @@ export const setupSockets = async (io) => {
 
         socket.on('sendMessage', async (payload, ackCallback) => {
             try {
+                console.log('sendmessage is triggerd ', payload)
                 // Support both spellings from payload
-                const receiverId = payload.receiverId || payload.recieverId;
+                const receiverId = payload.receiverId
                 const { content } = payload;
                 const senderId = userId; // secure sender identity
-
+                // database insertions and room creation
                 const savedMessage = await chatService.processPrivateMessage(senderId, receiverId, content);
-
+                // once after data base insertion is  done then emit the message to the receiver
+                console.log(savedMessage, 'saved message')
                 // emit to the receiver's personal channel
                 io.to(`user_${receiverId}`).emit('message', savedMessage);
 

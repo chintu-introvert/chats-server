@@ -8,18 +8,20 @@ class ChatService {
         const sanitizedContent = rawContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         let room = await roomRepo.findPrivateRoom(senderId, receiverId);
-
+        // fetching the room id from the user_rooms table
+        //  check if room exists or not  
         if (room) {
+            // if it exists just create the message
             return messageRepo.createMessage({
-                roomId: room.id,
+                roomId: room.roomid,
                 senderId,
                 content: sanitizedContent
             });
         }
-
         // Room doesn't exist, use transaction to create room and message
         return masterKnex.transaction(async (trx) => {
             const roomId = await roomRepo.createPrivateRoom(senderId, receiverId, trx);
+            // once room is created and chat room is also created then insert the message
             return messageRepo.createMessage({
                 roomId,
                 senderId,

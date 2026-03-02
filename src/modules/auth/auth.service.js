@@ -8,7 +8,8 @@ dotenv.config();
 class AuthService {
     async register({ name, email, password }) {
         const existingUser = await userRepository.findByEmail(email);
-
+        console.log(existingUser, 'existing user')
+        // check if the user is already exists
         if (existingUser) {
             throw new Error('Email already in use');
         }
