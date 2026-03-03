@@ -23,6 +23,10 @@ class RoomService {
     async getUserRooms(userId) {
         return roomRepo.getUserRooms(userId);
     }
+
+    async getLatestUserRooms(userId) {
+        return roomRepo.getLatestUserRooms(userId);
+    }
 }
 
 export default new RoomService();

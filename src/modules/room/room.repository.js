@@ -44,6 +44,24 @@ class RoomRepository {
             .where('user_rooms.userid', userId)
             .select('rooms.*');
     }
+
+    async getLatestUserRooms(userId) {
+        return slaveKnex('user_rooms as ur')
+            .innerJoin('users as u', 'u.id', 'ur.receiverid')
+            .innerJoin('rooms as r', 'r.id', 'ur.roomid')
+            .innerJoin('messages as m', 'm.roomid', 'r.id')
+            .where('ur.userid', userId)
+            .groupBy('r.id')
+            .select(
+                'r.*',
+                'u.*',
+                'ur.*',
+                'm.content',
+                // slaveKnex.raw('COUNT(m.id) as message_count'),
+                slaveKnex.raw('MAX(m.created_at) as last_message_at')
+            )
+            .orderBy('last_message_at', 'desc');
+    }
 }
 
 export default new RoomRepository();

@@ -33,6 +33,22 @@ class RoomController {
             next(error);
         }
     }
+
+    async listLatestRooms(req, res, next) {
+        try {
+            console.log('latest...')
+            const userId = req.user?.id; // Assuming auth middleware sets req.user
+            if (!userId) {
+                return res.status(401).json({ success: false, error: 'Unauthorized' });
+            }
+            const rooms = await roomService.getLatestUserRooms(userId);
+            console.log(rooms);
+            const result = {success: true, data: rooms}
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default new RoomController();

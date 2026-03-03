@@ -17,10 +17,11 @@ class MessageRepository {
 
     async getMessagesByRoom(roomId, limit = 50, offset = 0) {
         const records = await slaveKnex('messages')
+            .select('messages.*')
             .where({ roomid: roomId })
-            .orderBy('id', 'desc')
-            .limit(limit)
-            .offset(offset);
+            .orderBy('id', 'asc');
+            // .limit(limit)
+            // .offset(offset);
 
         return records.map(r => new Message(r));
     }
