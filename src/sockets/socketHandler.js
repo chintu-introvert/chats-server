@@ -54,11 +54,16 @@ export const setupSockets = async (io) => {
                 const { content } = payload;
                 const senderId = userId; // secure sender identity
                 // database insertions and room creation
-                const savedMessage = await chatService.processPrivateMessage(senderId, receiverId, content);
+                const responce = await chatService.processPrivateMessage(senderId, receiverId, content);
+                const savedMessage = responce.data;
                 // once after data base insertion is  done then emit the message to the receiver
                 console.log(savedMessage, 'saved message')
                 // emit to the receiver's personal channel
                 io.to(`user_${receiverId}`).emit('message', savedMessage);
+                // to update senders chat with newly created roomid
+                if(responce.newRoom){
+                    io.to(`user_${senderId}`).emit('newRoom', {id: receiverId, roomid: savedMessage.roomid});
+                }
 
                 if (typeof ackCallback === 'function') ackCallback({ success: true, payload: savedMessage });
             } catch (error) {

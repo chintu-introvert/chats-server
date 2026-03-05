@@ -8,8 +8,10 @@ class MessageRepository {
             .insert({ id: null, roomid: roomId, userid: senderId, content });
 
         const message = await trx('messages')
+            .select('messages.*','u.*')
+            .innerJoin('users as u', 'u.id', 'messages.userid')
             .where({ roomid: roomId })
-            .orderBy('id', 'desc')
+            .orderBy('messages.id', 'desc')
             .first();
 
         return new Message(message);

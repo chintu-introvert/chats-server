@@ -41,7 +41,13 @@ class RoomController {
             if (!userId) {
                 return res.status(401).json({ success: false, error: 'Unauthorized' });
             }
-            const rooms = await roomService.getLatestUserRooms(userId);
+            let rooms = await roomService.getLatestUserRooms(userId);
+            rooms = rooms.map(room => ({
+                ...room,
+                lastMessage: room.lastMessage 
+                    ? JSON.parse(room.lastMessage)
+                    : null
+                }));
             console.log(rooms);
             const result = {success: true, data: rooms}
             res.status(200).json(result);

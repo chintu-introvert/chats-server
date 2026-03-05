@@ -8,7 +8,9 @@ class MessageController {
             const offset = parseInt(req.query.offset, 10) || 0;
 
             const messages = await chatService.getRoomHistory(roomId, limit, offset);
-            res.status(200).json(messages);
+            console.log('messages',messages)
+            const result = {success: true, data: messages || []}
+            res.status(200).json(result);
         } catch (error) {
             next(error);
         }

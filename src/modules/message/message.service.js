@@ -5,30 +5,47 @@ import masterKnex from '../../config/knex.js';
 
 class ChatService {
     async processPrivateMessage(senderId, receiverId, rawContent) {
-        const sanitizedContent = rawContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const sanitizedContent = rawContent
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
 
-        let room = await roomRepo.findPrivateRoom(senderId, receiverId);
-        // fetching the room id from the user_rooms table
-        //  check if room exists or not  
-        if (room) {
-            // if it exists just create the message
-            return messageRepo.createMessage({
-                roomId: room.roomid,
+    const result = { data: null, newRoom: false };
+
+    let room = await roomRepo.findPrivateRoom(senderId, receiverId);
+
+    if (room) {
+
+        // ✅ await here
+        result.data = await messageRepo.createMessage({
+            roomId: room.roomid,
+            senderId,
+            content: sanitizedContent
+        });
+
+    } else {
+
+        // ✅ await transaction
+        result.data = await masterKnex.transaction(async (trx) => {
+
+            const roomId = await roomRepo.createPrivateRoom(
                 senderId,
-                content: sanitizedContent
-            });
-        }
-        // Room doesn't exist, use transaction to create room and message
-        return masterKnex.transaction(async (trx) => {
-            const roomId = await roomRepo.createPrivateRoom(senderId, receiverId, trx);
-            // once room is created and chat room is also created then insert the message
-            return messageRepo.createMessage({
+                receiverId,
+                trx
+            );
+
+            return await messageRepo.createMessage({
                 roomId,
                 senderId,
                 content: sanitizedContent
             }, trx);
+
         });
+
+        result.newRoom = true;
     }
+
+    return result;
+}
     async processIncomingMessage(userId, roomId, rawContent) {
         // Basic XSS prevention 
         const sanitizedContent = rawContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");

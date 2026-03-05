@@ -49,19 +49,44 @@ class RoomRepository {
         return slaveKnex('user_rooms as ur')
             .innerJoin('users as u', 'u.id', 'ur.receiverid')
             .innerJoin('rooms as r', 'r.id', 'ur.roomid')
-            .innerJoin('messages as m', 'm.roomid', 'r.id')
-            .where('ur.userid', userId)
-            .groupBy('r.id')
-            .select(
-                'r.*',
-                'u.*',
-                'ur.*',
-                'm.content',
-                // slaveKnex.raw('COUNT(m.id) as message_count'),
-                slaveKnex.raw('MAX(m.created_at) as last_message_at')
+
+            // Join only latest message
+            .leftJoin(
+                slaveKnex('messages as m1')
+                .select('m1.roomid', 'm1.content', 'm1.created_at', 'm1.userid')
+                .whereRaw(`
+                    m1.created_at = (
+                    SELECT MAX(m2.created_at)
+                    FROM messages m2
+                    WHERE m2.roomid = m1.roomid
+                    )
+                `)
+                .as('lm'),
+                'lm.roomid',
+                'r.id'
             )
-            .orderBy('last_message_at', 'desc');
-    }
+
+            .where('ur.userid', userId)
+
+            .select(
+                // 'r.*',
+                // 'u.*',
+                // 'ur.*',
+                'ur.receiverid as id',
+                'u.name',
+                'u.bio',
+                'ur.roomid',
+                slaveKnex.raw(`
+                JSON_OBJECT(
+                    'content', lm.content,
+                    'senderId', lm.userid,
+                    'created_at', lm.created_at
+                ) as lastMessage
+                `)
+            )
+
+            .orderBy('lm.created_at', 'desc');
+        }
 }
 
 export default new RoomRepository();
