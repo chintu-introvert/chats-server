@@ -4,15 +4,16 @@ import slaveKnex from '../../config/read_knex.js';
 class UserRepository {
     // Uses Master Knex instance for writes, wrapped in a transaction
     async create(userData) {
-        const result = await masterKnex.transaction(async (trx) => {
-            await trx('users').insert({
+        const user = await masterKnex.transaction(async (trx) => {
+            const [insertId] = await trx('users').insert({
                 name: userData.name,
                 email: userData.email,
                 password: userData.passwordHash
             });
+            return trx('users').where({ id: insertId }).first();
         });
 
-        return result;
+        return user;
     }
 
     // Uses Slave Knex instance for reads, paired with automatic retries

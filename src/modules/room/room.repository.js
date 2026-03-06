@@ -53,15 +53,15 @@ class RoomRepository {
             // Join only latest message
             .leftJoin(
                 slaveKnex('messages as m1')
-                .select('m1.roomid', 'm1.content', 'm1.created_at', 'm1.userid')
-                .whereRaw(`
+                    .select('m1.roomid', 'm1.content', 'm1.created_at', 'm1.userid')
+                    .whereRaw(`
                     m1.created_at = (
                     SELECT MAX(m2.created_at)
                     FROM messages m2
                     WHERE m2.roomid = m1.roomid
                     )
                 `)
-                .as('lm'),
+                    .as('lm'),
                 'lm.roomid',
                 'r.id'
             )
@@ -74,7 +74,6 @@ class RoomRepository {
                 // 'ur.*',
                 'ur.receiverid as id',
                 'u.name',
-                'u.bio',
                 'ur.roomid',
                 slaveKnex.raw(`
                 JSON_OBJECT(
@@ -86,7 +85,7 @@ class RoomRepository {
             )
 
             .orderBy('lm.created_at', 'desc');
-        }
+    }
 }
 
 export default new RoomRepository();
