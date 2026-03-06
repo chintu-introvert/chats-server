@@ -50,7 +50,7 @@ class RoomRepository {
             .innerJoin('users as u', 'u.id', 'ur.receiverid')
             .innerJoin('rooms as r', 'r.id', 'ur.roomid')
 
-            // Join only latest message
+            // Join only the latest message per room
             .leftJoin(
                 slaveKnex('messages as m1')
                     .select('m1.roomid', 'm1.content', 'm1.created_at', 'm1.userid')
@@ -69,17 +69,20 @@ class RoomRepository {
             .where('ur.userid', userId)
 
             .select(
-                // 'r.*',
-                // 'u.*',
-                // 'ur.*',
                 'ur.receiverid as id',
                 'u.name',
+                'u.profile',
                 'ur.roomid',
+                // Return null when no message exists, otherwise a proper JSON string
                 slaveKnex.raw(`
-                JSON_OBJECT(
-                    'content', lm.content,
-                    'senderId', lm.userid,
-                    'created_at', lm.created_at
+                IF(
+                    lm.content IS NULL,
+                    NULL,
+                    JSON_UNQUOTE(JSON_OBJECT(
+                        'content', lm.content,
+                        'senderId', lm.userid,
+                        'created_at', DATE_FORMAT(lm.created_at, '%Y-%m-%dT%H:%i:%s.000Z')
+                    ))
                 ) as lastMessage
                 `)
             )

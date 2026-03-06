@@ -36,20 +36,24 @@ class RoomController {
 
     async listLatestRooms(req, res, next) {
         try {
-            console.log('latest...')
             const userId = req.user?.id; // Assuming auth middleware sets req.user
+            console.log('latest...', userId)
             if (!userId) {
                 return res.status(401).json({ success: false, error: 'Unauthorized' });
             }
             let rooms = await roomService.getLatestUserRooms(userId);
-            rooms = rooms.map(room => ({
-                ...room,
-                lastMessage: room.lastMessage 
-                    ? JSON.parse(room.lastMessage)
-                    : null
-                }));
+            rooms = rooms.map(room => {
+                let lastMessage = null;
+                if (room.lastMessage) {
+                    // MySQL driver may return a string or already-parsed object
+                    lastMessage = typeof room.lastMessage === 'string'
+                        ? JSON.parse(room.lastMessage)
+                        : room.lastMessage;
+                }
+                return { ...room, lastMessage };
+            });
             console.log(rooms);
-            const result = {success: true, data: rooms}
+            const result = { success: true, data: rooms }
             res.status(200).json(result);
         } catch (error) {
             next(error);
